@@ -1,21 +1,20 @@
 export async function load({ params }) {
-  const name = params.name;
+  const nomePokemon = params.name.toLowerCase();
+  const resposta = await fetch(`https://pokeapi.co/api/v2/pokemon/${nomePokemon}`);
 
-  const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-  if (!res.ok) {
-    throw new Error(`Não foi possível carregar o Pokémon ${name}`);
+  if (!resposta.ok) {
+    return { status: 404 };
   }
 
-  const data = await res.json();
-
+  const dados = await resposta.json();
+  
   return {
     pokemon: {
-      name: data.name,
-      image: data.sprites.front_default,
-      height: data.height,
-      weight: data.weight,
-      types: data.types.map(t => t.type.name),
-      abilities: data.abilities.map(a => a.ability.name)
+      nome: dados.name,
+      imagem: dados.sprites.front_default,
+      altura: (dados.height / 10).toFixed(1),
+      peso: (dados.weight / 10).toFixed(1),
+      tipos: dados.types.map(t => t.type.name)
     }
   };
 }
