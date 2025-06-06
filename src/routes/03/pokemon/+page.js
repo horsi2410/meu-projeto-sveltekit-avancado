@@ -1,47 +1,96 @@
 export async function load({ url }) {
-    const limit = 20;
-    const page = parseInt(url.searchParams.get('page')) || 1;
-    const name = url.searchParams.get('name')?.toLowerCase() || '';
-    const offset = (page - 1) * limit;
-  
-    if (name) {
-      try {
-        const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-        if (!res.ok) throw new Error('Not found');
-        const pokemon = await res.json();
-        const pokemons = [{
-          name: pokemon.name,
-          image: pokemon.sprites.front_default || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`
-        }];
+  const POKEMONS_POR_PAGINA = 12;
+  const paginaAtual = Number(url.searchParams.get('pagina')) || 1;
+  const termoBusca = url.searchParams.get('busca')?.toLowerCase().trim() || '';
+  const tipoSelecionado = url.searchParams.get('tipo')?.toLowerCase().trim() || '';
+  const offset = (paginaAtual - 1) * POKEMONS_POR_PAGINA;
+
+  // Busca os tipos de Pokémon disponíveis
+  const responseTipos = await fetch('https://pokeapi.co/api/v2/type');
+  const { results: tipos } = await responseTipos.json();
+
+  try {
+    // Filtro por tipo
+    if (tipoSelecionado) {
+      const responseTipo = await fetch(`https://pokeapi.co/api/v2/type/${tipoSelecionado}`);
+      const { pokemon: pokemonsDoTipo } = await responseTipo.json();
+      
+      const pokemonsFiltrados = pokemonsDoTipo.slice(offset, offset + POKEMONS_POR_PAGINA).map(item => {
+        const id = item.pokemon.url.split('/').filter(Boolean).pop();
         return {
-          pokemons,
-          page: 1,
-          total: 1,
-          limit: 20
+          nome: item.pokemon.name,
+          imagem: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
+          id
         };
-      } catch {
-        return {
-          pokemons: [],
-          page: 1,
-          total: 0,
-          limit: 20
-        };
-      }
-    } else {
-      const res = await fetch(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=${limit}`);
-      const data = await res.json();
-  
-      for (const pokemon of data.results) {
-        const id = pokemon.url.split("/").at(-2);
-        pokemon.image = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
-      }
-  
+      });
+
       return {
-        pokemons: data.results,
-        page,
-        total: data.count,
-        limit
+        pokemons: pokemonsFiltrados,
+        total: pokemonsDoTipo.length,
+        paginaAtual,
+        porPagina: POKEMONS_POR_PAGINA,
+        tipos,
+        tipoSelecionado
       };
     }
+
+    // Busca por nome
+    if (termoBusca) {
+      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${termoBusca}`);
+      
+      if (!response.ok) {
+        return {
+          pokemons: [],
+          total: 0,
+          paginaAtual: 1,
+          porPagina: POKEMONS_POR_PAGINA,
+          tipos,
+          erro: 'Pokémon não encontrado'
+        };
+      }
+
+      const pokemon = await response.json();
+      return {
+        pokemons: [{
+          nome: pokemon.name,
+          imagem: pokemon.sprites.front_default,
+          id: pokemon.id
+        }],
+        total: 1,
+        paginaAtual: 1,
+        porPagina: POKEMONS_POR_PAGINA,
+        tipos
+      };
+    }
+
+    // Paginação normal
+    const response = await fetch(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=${POKEMONS_POR_PAGINA}`);
+    const dados = await response.json();
+
+    const pokemons = dados.results.map(pokemon => {
+      const id = pokemon.url.split('/').filter(Boolean).pop();
+      return {
+        nome: pokemon.name,
+        imagem: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
+        id
+      };
+    });
+
+    return {
+      pokemons,
+      total: dados.count,
+      paginaAtual,
+      porPagina: POKEMONS_POR_PAGINA,
+      tipos
+    };
+  } catch {
+    return {
+      pokemons: [],
+      total: 0,
+      paginaAtual: 1,
+      porPagina: POKEMONS_POR_PAGINA,
+      tipos,
+      erro: 'Erro ao carregar os Pokémons'
+    };
   }
-  
+}
