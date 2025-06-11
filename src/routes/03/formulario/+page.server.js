@@ -6,3 +6,5 @@ export async function load({ url }) {
    
     return { fruta, legume };
   }
+
+ouuuufidahai end frei mai frai efiderai
