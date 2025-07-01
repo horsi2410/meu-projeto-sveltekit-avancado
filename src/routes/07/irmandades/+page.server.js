@@ -12,7 +12,7 @@ export const actions = {
         const idade = atual - aniversario;
         if (idade < 568025136000) return fail(400, { error: 'Precisa ter pelo menos 18 anos.' });
         
-        redirect(303, '/irmandades/guerreiros');
+        redirect(303, '/07/irmandades/guerreiros');
     },
     magos: async ({ request }) => {
         const data = await request.formData();
@@ -27,7 +27,7 @@ export const actions = {
         const idade = atual - aniversario;
         if (idade < 504921600000) return fail(400, { error: 'Precisa ter pelo menos 16 anos.' });
         
-        redirect(303, '/irmandades/magos');
+        redirect(303, '/07/irmandades/magos');
     },
     artesaos: async ({ request }) => {
         const data = await request.formData();
@@ -40,8 +40,8 @@ export const actions = {
 
         const atual = new Date(), aniversario = new Date(nascimento);
         const idade = atual - aniversario;
-        if (idade < 473385600000) return fail(400, { error: 'Precisa ter pelo menos 15 anos.' }); // 15 anos em ms
+        if (idade < 473385600000) return fail(400, { error: 'Precisa ter pelo menos 15 anos.' }); 
         
-        redirect(303, '/irmandades/artesaos');
+        redirect(303, '/07/irmandades/artesaos');
     }
 };

@@ -11,7 +11,7 @@
     ferramentas de artesão: <input name='ferramentas' type='checkbox'/> <br> 
     <button formaction='?/guerreiros'>Inscrever na Ordem dos guerreiros</button><br>
     <button formaction='?/magos'>Inscrever no Circulo dos Magos</button><br>
-    <button formaction='?/artesao'>Inscrever na Guilda dos Artesão</button><br>
+    <button formaction='?/artesaos'>Inscrever na Guilda dos Artesão</button><br>
 </form>
 {#if form?.error}
 <p style='color:red'> {form.error}</p>
