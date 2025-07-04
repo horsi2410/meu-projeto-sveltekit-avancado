@@ -1,6 +1,7 @@
 import { fail } from '@sveltejs/kit';
 
 // O objeto `actions` exportado contém todas as ações nomeadas da página.
+// Cada chave do objeto (ex: 'multiplicar') é o nome da ação.
 export const actions = {
   // Ação 'multiplicar'
   multiplicar: async ({ request }) => {
@@ -10,6 +11,7 @@ export const actions = {
 
     // Validação: garante que os campos são números.
     if (isNaN(x) || isNaN(y)) {
+      // Retorna um erro 400 (Bad Request) com uma mensagem e os dados submetidos.
       return fail(400, { error: 'Informe números válidos.', x, y });
     }
 
